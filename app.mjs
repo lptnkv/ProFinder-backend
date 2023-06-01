@@ -1,4 +1,4 @@
-import express from "express";
+import express, { request } from "express";
 import cors from "cors";
 import dbConnect from "./db/dbConnect.mjs"
 import bcrypt from "bcrypt"
@@ -13,19 +13,6 @@ dbConnect();
 const PORT = 3001
 
 const app = express();
-
-app.use((req, res, next) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader(
-        "Access-Control-Allow-Headers",
-        "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization"
-    );
-    res.setHeader(
-        "Access-Control-Allow-Methods",
-        "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-    );
-    next();
-});
 
 app.use(cors());
 app.use(express.json());
@@ -118,10 +105,52 @@ app.get("/auth-endpoint", auth, (request, response) => {
 });
 
 app.get("/jobs", (request, response) => {
-    let query = request.query.query
-    let limit = request.query.limit || 200;
-    Job.find().limit(limit).then(res => {
+    const query = request.query.query || ''
+    console.log(query)
+    const limit = request.query.limit || 200;
+    Job.find({ "name": { $regex: `${query}` } }).limit(limit).then(res => {
         response.json(res)
+        console.log("serving get jobs method ")
+    })
+})
+
+app.get("/users", (request, response) => {
+    User.find().then(res => {
+        console.log(res)
+        response.json(res)
+    })
+    .catch(err => {
+        console.log(err);
+    })
+})
+
+app.get("/jobs/:jobId", (request, response) => {
+    const jobId = request.params.jobId;
+    Job.findById(jobId).then(res => {
+        response.json(res);
+        console.log("serving get jobs by id method ")
+    }).catch(err => {
+        console.log(err);
+    })
+})
+
+app.get("/user/:userId", (request, response) => {
+    const userId = request.params.userId;
+    User.findById(userId).then(res => {
+        response.json(res);
+        console.log("serving get user by id method ")
+    }).catch(err => {
+        console.log(err);
+    })
+})
+
+app.get("/user/:userId/jobs", (request, response) => {
+    const userId = request.params.userId;
+    Job.find({"creator_id": userId}).then(res => {
+        response.json(res);
+        console.log("serving get user's jobs")
+    }).catch(err => {
+        console.log(err);
     })
 })
 
