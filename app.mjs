@@ -1,14 +1,18 @@
 import express from "express";
 import cors from "cors";
-import jobs from "./routes/jobs.mjs"
 import dbConnect from "./db/dbConnect.mjs"
 import bcrypt from "bcrypt"
 import User from "./db/userModel.mjs"
+import Job from "./db/jobModel.mjs"
 import jwt from "jsonwebtoken"
-const auth = require("./auth");
+
+import auth from "./auth.mjs"
 
 dbConnect();
 
+const PORT = 3001
+
+const app = express();
 
 app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -23,12 +27,8 @@ app.use((req, res, next) => {
     next();
 });
 
-const app = express();
-
 app.use(cors());
 app.use(express.json());
-
-app.use("/jobs", jobs)
 
 app.post("/register", (request, response) => {
     bcrypt
@@ -116,3 +116,15 @@ app.get("/free-endpoint", (request, response) => {
 app.get("/auth-endpoint", auth, (request, response) => {
     response.json({ message: "You are authorized to access me" });
 });
+
+app.get("/jobs", (request, response) => {
+    let query = request.query.query
+    let limit = request.query.limit || 200;
+    Job.find().limit(limit).then(res => {
+        response.json(res)
+    })
+})
+
+app.listen(PORT, () => {
+    console.log(`Listening at port ${PORT}`)
+})
