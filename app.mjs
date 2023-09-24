@@ -5,6 +5,8 @@ import bcrypt from "bcrypt"
 import User from "./db/userModel.mjs"
 import Job from "./db/jobModel.mjs"
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose";
+const {Schema} = mongoose;
 
 import auth from "./auth.mjs"
 
@@ -18,13 +20,17 @@ app.use(cors());
 app.use(express.json());
 
 app.post("/register", (request, response) => {
+    const requestUser = request.body
     bcrypt
         .hash(request.body.password, 10)
         .then((hashedPassword) => {
             const user = new User({
+                _id: new mongoose.Types.ObjectId(),
                 email: request.body.email,
                 password: hashedPassword,
+                role: "user"
             });
+            console.log(user)
 
             user
                 .save()
@@ -35,16 +41,18 @@ app.post("/register", (request, response) => {
                     });
                 })
                 .catch((error) => {
+                    console.log(error)
                     response.status(500).send({
                         message: "Error creating user",
                         error,
                     });
                 });
         })
-        .catch((e) => {
+        .catch((error) => {
+            console.log(error)
             response.status(500).send({
                 message: "Password was not hashed successfully",
-                e,
+                error: error,
             });
         });
 });
