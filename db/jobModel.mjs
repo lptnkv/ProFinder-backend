@@ -18,11 +18,9 @@ const JobSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "User"
     },
-    address: {
-        type: String,
-        maxLength: 200,
-        unique: false,
-        required: false
+    price: {
+        type: Number,
+        required: true,
     }
 })
 
