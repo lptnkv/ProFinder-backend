@@ -1,0 +1,145 @@
+{
+    "swagger": "2.0",
+    "basePath": "/",
+    "info": { "title": "Todo app API.", "version": "1.0.0" },
+    "definitions": {
+        "Job": {
+            "type": "object",
+            "properties": {
+                "_id": { "type": "number" },
+                "name": {
+                    "type": "string"
+                },
+                "descr": {
+                    "type": "string"
+                },
+                "_creator": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                }
+            },
+            "required": ["_id", "name", "descr", "_creator", "price"]
+        },
+        "User": {
+            "type": "object",
+            "properties": {
+                "_id": { "type": "number" },
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "number"
+                }
+            },
+            "required": ["_id", "email", "password", "role", "name"]
+        }
+    },
+    "paths": {
+        "/jobs": {
+            "parameters": [],
+            "get": {
+                "summary": "Fetch jobs.",
+                "operationId": "getTodos",
+                "responses": {
+                    "200": {
+                        "description": "List of jobs.",
+                        "schema": {
+                            "type": "array",
+                            "items": { "$ref": "#/definitions/Job" }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Create jobs.",
+                "operationId": "createJob",
+                "consumes": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "todo",
+                        "schema": { "$ref": "#/definitions/Job" }
+                    }
+                ],
+                "responses": { "201": { "description": "Created" } }
+            },
+            "put": {
+                "summary": "Update job.",
+                "operationId": "updateJob",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "id",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "todo",
+                        "schema": { "$ref": "#/definitions/Job" }
+                    }
+                ],
+                "responses": { "200": { "description": "Updated ok" } }
+            },
+            "delete": {
+                "summary": "Delete job.",
+                "operationId": "deleteJob",
+                "consumes": ["application/json"],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "id",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": { "200": { "description": "Delete" } }
+            }
+        },
+        "/users": {
+            "parameters": [],
+            "get": {
+                "summary": "Fetch users.",
+                "operationId": "getUsers",
+                "responses": {
+                    "200": {
+                        "description": "List of users.",
+                        "schema": {
+                            "type": "array",
+                            "items": { "$ref": "#/definitions/User" }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{userId}": {
+            "parameters": [{
+                "in": "path",
+                "name": "userId",
+                "type:": "string"
+            }],
+            "get": {
+                "summary": "Fetch user by id.",
+                "operationId": "getUsers",
+                "responses": {
+                    "200": {
+                        "description": "List of users.",
+                        "schema": {
+                            "type": "array",
+                            "items": { "$ref": "#/definitions/User" }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "host": "127.0.0.1:3001"
+}

@@ -1,12 +1,18 @@
 import express, { request } from "express";
 import cors from "cors";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+
 import dbConnect from "./db/dbConnect.mjs";
-import bcrypt from "bcrypt";
 import User from "./db/userModel.mjs";
 import Job from "./db/jobModel.mjs";
+
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
-const { Schema } = mongoose;
+import {initialize} from "express-openapi"
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
 
 import auth from "./auth.mjs";
 
@@ -18,6 +24,23 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+initialize({
+    app,
+    apiDoc: require("./api/api-doc"),
+    paths: "./api/paths",
+});
+
+var options = {
+    explorer: true,
+    url: "http://127.0.0.1:3001/api-docs",
+  };
+
+app.use(
+    "/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerDocument, options)
+);
 
 app.post("/register", (request, response) => {
     const requestUser = request.body;
@@ -102,13 +125,6 @@ app.post("/login", (request, response) => {
         });
 });
 
-app.get("/free-endpoint", (request, response) => {
-    response.json({ message: "You are free to access me anytime" });
-});
-
-app.get("/auth-endpoint", auth, (request, response) => {
-    response.json({ message: "You are authorized to access me" });
-});
 
 app.get("/jobs", (request, response) => {
     const query = request.query.query || "";
@@ -138,9 +154,9 @@ app.get("/jobs/:jobId", (request, response) => {
     let creator_id;
     Job.findById(jobId)
         .then((jobRes) => {
-            creator_id = jobRes._creator
-            User.findById(creator_id).then((userRes => {
-                const res = {}
+            creator_id = jobRes._creator;
+            User.findById(creator_id).then((userRes) => {
+                const res = {};
                 res.name = jobRes.name;
                 res.descr = jobRes.descr;
                 res._creator = jobRes._creator;
@@ -150,7 +166,7 @@ app.get("/jobs/:jobId", (request, response) => {
                 res.phone = userRes.phone;
                 console.log(res);
                 response.json(res);
-            }))
+            });
             console.log("serving get jobs by id method ");
         })
         .catch((err) => {
@@ -192,7 +208,7 @@ app.get("/user/:userId/jobs", (request, response) => {
         });
 });
 
-app.post("/addJob", (request, response) => {
+app.post("/jobs", (request, response) => {
     console.log("serving add job endpoint");
     console.log(request);
     const job = new Job({
@@ -218,6 +234,16 @@ app.post("/addJob", (request, response) => {
                 error,
             });
         });
+});
+
+app.patch("/jobs", (request, response) => {
+    console.log("serving edit job endpoint");
+    console.log(request);
+    const job = request.body;
+    console.log(job);
+
+    dbJob = Job.findById(job._id);
+    console.log(dbJob);
 });
 
 app.listen(PORT, () => {
